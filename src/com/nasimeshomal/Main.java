@@ -10,11 +10,14 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class Main {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, SQLException {
         PlainDate today = SystemClock.inLocalView().today();
         PersianCalendar from = today.transform(PersianCalendar.class);
         PersianCalendar to=PersianCalendar.of(1394,12,20);
@@ -22,6 +25,8 @@ public class Main {
         ArrayList<String> dates= PersianStringDate.GetDates(from,to);
 
         String baseUrl="http://www.tabnak.ir/fa/prayer/time/25/25_163/";
+
+        Connection connection= DriverManager.getConnection("jdbc:sqlite:Azan.db");
 
         for (String date:dates)
         {
@@ -40,6 +45,7 @@ public class Main {
             DateTime sobDateTime=PersianStringDate.GetGregorianDateTime(date.toString(),azanSob);
             DateTime zohrDateTime=PersianStringDate.GetGregorianDateTime(date.toString(),azanZohr);
             DateTime maghrebDateTime=PersianStringDate.GetGregorianDateTime(date.toString(),azanMaghreb);
+
 
             System.out.println();
         }
