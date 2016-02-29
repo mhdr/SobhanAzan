@@ -1,6 +1,8 @@
 package com.nasimeshomal;
 
+import net.time4j.PlainDate;
 import net.time4j.calendar.PersianCalendar;
+import org.joda.time.DateTime;
 
 import java.util.ArrayList;
 
@@ -8,6 +10,32 @@ import java.util.ArrayList;
  * Created by ma.ramezani on 2/28/2016.
  */
 public class PersianStringDate {
+
+    public static DateTime GetGregorianDateTime(String dateStr,String timeStr)
+    {
+        String yearStr=dateStr.substring(0,4);
+        String monthStr=dateStr.substring(4,6);
+        String dayStr=dateStr.substring(6,8);
+
+        String hourStr= timeStr.split(":")[0];
+        String minuteStr= timeStr.split(":")[1];
+        String secondStr= timeStr.split(":")[2];
+
+        int year=Integer.parseInt(yearStr);
+        int month=Integer.parseInt(monthStr);
+        int day=Integer.parseInt(dayStr);
+
+        PersianCalendar jalali=PersianCalendar.of(year,month,day);
+        PlainDate plainDate=jalali.transform(PlainDate.class);
+
+        int hour=Integer.parseInt(hourStr);
+        int minute=Integer.parseInt(minuteStr);
+        int second=Integer.parseInt(secondStr);
+
+        DateTime dateTime=new DateTime(plainDate.getYear(),plainDate.getMonth(),plainDate.getDayOfMonth(),hour,minute,second);
+
+        return dateTime;
+    }
 
     public static ArrayList<String> GetDates(PersianCalendar from, PersianCalendar to)
     {

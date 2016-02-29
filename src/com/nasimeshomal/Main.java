@@ -3,9 +3,11 @@ package com.nasimeshomal;
 import net.time4j.PlainDate;
 import net.time4j.SystemClock;
 import net.time4j.calendar.PersianCalendar;
+import org.joda.time.DateTime;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
+
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -34,6 +36,12 @@ public class Main {
 
             System.out.print(date.toString());
             System.out.println(String.format(" => Sob : %s , Zohr : %s , Maghreb : %s",azanSob,azanZohr,azanMaghreb));
+
+            DateTime sobDateTime=PersianStringDate.GetGregorianDateTime(date.toString(),azanSob);
+            DateTime zohrDateTime=PersianStringDate.GetGregorianDateTime(date.toString(),azanZohr);
+            DateTime maghrebDateTime=PersianStringDate.GetGregorianDateTime(date.toString(),azanMaghreb);
+
+            System.out.println();
         }
 
     }
