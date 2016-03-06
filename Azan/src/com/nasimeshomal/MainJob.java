@@ -4,6 +4,8 @@ import org.joda.time.DateTime;
 import org.joda.time.Seconds;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -15,53 +17,86 @@ public class MainJob implements Job{
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
 
+        Logger logger= LoggerFactory.getLogger(MainJob.class);
+        logger.info(String.format("MainJob is running : %s",new DateTime().toString()));
+
         Azan azan=null;
 
         try {
             azan = this.getNextAzan();
+            logger.info(azan.toString());
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
         if (azan!=null)
         {
-            // TODO check if scheduler is present
-
             int offsetForPlay=48;
             int offsetForTurningSpeakerOn=60;
 
-            DateTime timeToPlayAzan=DateTime.parse(azan.getAzanDateTime()).minusSeconds(offsetForPlay);
-
-            JobDetail job= JobBuilder.newJob(PlayJob.class).withIdentity(azan.getAzanDateTime(),"Play").build();
-
-            SimpleTrigger trigger= (SimpleTrigger) TriggerBuilder.newTrigger()
-                    .withIdentity(azan.getAzanDateTime(),"Play")
-                    .startAt(timeToPlayAzan.toDate())
-                    .build();
-
-            Scheduler scheduler= null;
             try {
-                scheduler = new StdSchedulerFactory().getScheduler();
-                scheduler.start();
-                scheduler.scheduleJob(job,trigger);
-            } catch (SchedulerException e) {
-                e.printStackTrace();
-            }
+                if (Statics.getSchedulerPlay()==null)
+                {
+                    Statics.setSchedulerPlay(new StdSchedulerFactory().getScheduler());
+                    Statics.getSchedulerPlay().start();
+                    logger.info("new Scheduler is initialized for Play.");
+                }
 
-            DateTime timeToTurnOnSpeaker=DateTime.parse(azan.getAzanDateTime()).minusSeconds(offsetForTurningSpeakerOn);
+                JobKey jobKeyPlay=new JobKey(azan.getAzanDateTime(),"Play");
 
-            JobDetail job2= JobBuilder.newJob(TurnOnSpeakerJob.class).withIdentity(azan.getAzanDateTime(),"Speaker").build();
+                if (!Statics.getSchedulerPlay().checkExists(jobKeyPlay))
+                {
+                    DateTime timeToPlayAzan=DateTime.parse(azan.getAzanDateTime()).minusSeconds(offsetForPlay);
 
-            SimpleTrigger trigger2= (SimpleTrigger) TriggerBuilder.newTrigger()
-                    .withIdentity(azan.getAzanDateTime(),"Speaker")
-                    .startAt(timeToTurnOnSpeaker.toDate())
-                    .build();
+                    JobDetail job= JobBuilder.newJob(PlayJob.class).withIdentity(azan.getAzanDateTime(),"Play").build();
+                    logger.info(String.format("New Job is created : %s",job.getKey().toString()));
 
-            Scheduler scheduler2= null;
-            try {
-                scheduler2 = new StdSchedulerFactory().getScheduler();
-                scheduler2.start();
-                scheduler2.scheduleJob(job2,trigger2);
+                    SimpleTrigger trigger= (SimpleTrigger) TriggerBuilder.newTrigger()
+                            .withIdentity(azan.getAzanDateTime(),"Play")
+                            .startAt(timeToPlayAzan.toDate())
+                            .build();
+
+                    logger.info(String.format("New Trigger is created : %s",trigger.getKey().toString()));
+
+                    Statics.getSchedulerPlay().scheduleJob(job,trigger);
+
+                    logger.info(String.format("New Job is scheduled for Play"));
+                }
+                else {
+                    logger.info(String.format("Job exists : %s",jobKeyPlay.toString()));
+                }
+
+                if (Statics.getSchedulerSpeaker()==null)
+                {
+                    Statics.setSchedulerSpeaker(new StdSchedulerFactory().getScheduler());
+                    Statics.getSchedulerPlay().start();
+                    logger.info("new Scheduler is initialized for Speaker.");
+                }
+
+                JobKey jobKeySpeaker=new JobKey(azan.getAzanDateTime(),"Speaker");
+
+                if (!Statics.getSchedulerSpeaker().checkExists(jobKeySpeaker))
+                {
+                    DateTime timeToTurnOnSpeaker=DateTime.parse(azan.getAzanDateTime()).minusSeconds(offsetForTurningSpeakerOn);
+
+                    JobDetail job2= JobBuilder.newJob(TurnOnSpeakerJob.class).withIdentity(azan.getAzanDateTime(),"Speaker").build();
+                    logger.info(String.format("New Job is created : %s",job2.getKey().toString()));
+
+
+                    SimpleTrigger trigger2= (SimpleTrigger) TriggerBuilder.newTrigger()
+                            .withIdentity(azan.getAzanDateTime(),"Speaker")
+                            .startAt(timeToTurnOnSpeaker.toDate())
+                            .build();
+
+                    logger.info(String.format("New Trigger is created : %s",trigger2.getKey().toString()));
+
+                    Statics.getSchedulerSpeaker().scheduleJob(job2,trigger2);
+                    logger.info(String.format("New Job is scheduled for Speaker"));
+                }
+                else {
+                    logger.info(String.format("Job exists : %s",jobKeySpeaker.toString()));
+                }
+
             } catch (SchedulerException e) {
                 e.printStackTrace();
             }

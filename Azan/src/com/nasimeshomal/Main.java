@@ -25,10 +25,4 @@ public class Main {
         scheduler.start();
         scheduler.scheduleJob(job,trigger);
     }
-
-    private static void PlayAzan() throws FileNotFoundException, JavaLayerException {
-        FileInputStream fileInputStream = new FileInputStream("Azan1.mp3");
-        Player player=new Player(fileInputStream);
-        player.play();
-    }
 }
