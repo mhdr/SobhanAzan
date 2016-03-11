@@ -23,8 +23,16 @@ public class MainJob implements Job{
         Azan azan=null;
 
         try {
-            azan = this.getNextAzan();
-            logger.info(azan.toString());
+            if (azan!=null)
+            {
+                azan = this.getNextAzan();
+                logger.info(azan.toString());
+            }
+            else
+            {
+                logger.warn("Azan is null.");
+            }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
