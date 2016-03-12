@@ -23,9 +23,10 @@ public class MainJob implements Job{
         Azan azan=null;
 
         try {
+            azan = this.getNextAzan();
+
             if (azan!=null)
             {
-                azan = this.getNextAzan();
                 logger.info(azan.toString());
             }
             else
