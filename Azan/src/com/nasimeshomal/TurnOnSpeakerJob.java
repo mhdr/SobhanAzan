@@ -10,6 +10,6 @@ import org.quartz.JobExecutionException;
 public class TurnOnSpeakerJob implements Job {
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
-
+        RaspGPIO.getInstance().getSpeakerPin().high();
     }
 }

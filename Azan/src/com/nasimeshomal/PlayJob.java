@@ -15,7 +15,13 @@ import java.io.FileNotFoundException;
 public class PlayJob implements Job {
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
-        this.PlayAzan();
+        try {
+            this.PlayAzan();
+            Thread.sleep(4000);
+            RaspGPIO.getInstance().getSpeakerPin().low();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
 
