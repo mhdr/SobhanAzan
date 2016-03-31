@@ -4,9 +4,15 @@ package com.nasimeshomal;
  * Created by ma.ramezani on 3/5/2016.
  */
 public class Azan {
-    private int AzanId;
+    private int AzanId=0;
     private String AzanDateTime;
     private int AzanType;
+
+    public Azan(String azanDateTime,int azanType)
+    {
+        this.AzanDateTime=azanDateTime;
+        this.AzanType=azanType;
+    }
 
     public Azan(int azanId,String azanDateTime,int azanType)
     {

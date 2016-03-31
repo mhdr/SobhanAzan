@@ -2,18 +2,27 @@ package com.nasimeshomal;
 
 import org.joda.time.DateTime;
 import org.joda.time.Seconds;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Created by ma.ramezani on 3/5/2016.
  */
 public class MainJob implements Job{
+
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
 
@@ -35,6 +44,10 @@ public class MainJob implements Job{
             }
 
         } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
             e.printStackTrace();
         }
 
@@ -112,33 +125,48 @@ public class MainJob implements Job{
         }
     }
 
-    private Azan getNextAzan() throws SQLException {
+    private Azan getNextAzan() throws SQLException, IOException, ParseException {
+        Boolean useJson=true;
         DateTime today=new DateTime();
         String todayStr=today.toString("yyyy-MM-dd");
-
-        Connection connection = DriverManager.getConnection("jdbc:sqlite:Azan.db");
-
-        Statement statement = connection.createStatement();
-
-        ResultSet rs= statement.executeQuery("SELECT * FROM Times;");
-
         ArrayList<Azan> tempList=new ArrayList<>();
 
-        while (rs.next())
+        if (useJson)
         {
-            int azanId=rs.getInt("AzanId");
-            String azanDateTime=rs.getString("AzanDateTime");
-            int azanType=rs.getInt("AzanType");
+            byte[] encoded= Files.readAllBytes(Paths.get("Azan.json"));
+            String jsonStr=new String(encoded);
 
-            if (azanDateTime.startsWith(todayStr))
+            JSONParser parser=new JSONParser();
+            JSONObject azanTimes= (JSONObject) parser.parse(jsonStr);
+
+            System.out.print("");
+
+        }
+        else {
+            Connection connection = DriverManager.getConnection("jdbc:sqlite:Azan.db");
+
+            Statement statement = connection.createStatement();
+
+            ResultSet rs= statement.executeQuery("SELECT * FROM Times;");
+
+            while (rs.next())
             {
-                tempList.add(new Azan(azanId,azanDateTime,azanType));
+                int azanId=rs.getInt("AzanId");
+                String azanDateTime=rs.getString("AzanDateTime");
+                int azanType=rs.getInt("AzanType");
+
+                if (azanDateTime.startsWith(todayStr))
+                {
+                    tempList.add(new Azan(azanId,azanDateTime,azanType));
+                }
             }
+
+            rs.close();
+            statement.close();
+            connection.close();
         }
 
-        rs.close();
-        statement.close();
-        connection.close();
+
 
         DateTime now=new DateTime();
 
