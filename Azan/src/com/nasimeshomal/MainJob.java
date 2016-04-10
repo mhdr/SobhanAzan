@@ -46,6 +46,8 @@ public class MainJob implements Job{
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
 
         if (azan!=null)
@@ -66,7 +68,7 @@ public class MainJob implements Job{
                 if (!Statics.getSchedulerPlay().checkExists(jobKeyPlay))
                 {
                     java.util.Date azanDate= Formatter.parse(azan.getAzanDateTime());
-                    DateTime timeToPlayAzan=DateTime.parse(azanDate.toString()).minusSeconds(offsetForPlay);
+                    DateTime timeToPlayAzan=new DateTime(azanDate).minusSeconds(offsetForPlay);
 
                     JobDetail job= JobBuilder.newJob(PlayJob.class).withIdentity(azan.getAzanDateTime(),"Play").build();
                     logger.info(String.format("New Job is created : %s",job.getKey().toString()));
@@ -98,7 +100,7 @@ public class MainJob implements Job{
                 if (!Statics.getSchedulerSpeaker().checkExists(jobKeySpeaker))
                 {
                     java.util.Date azanDate= Formatter.parse(azan.getAzanDateTime());
-                    DateTime timeToTurnOnSpeaker=DateTime.parse(azanDate.toString()).minusSeconds(offsetForTurningSpeakerOn);
+                    DateTime timeToTurnOnSpeaker=new DateTime(azanDate).minusSeconds(offsetForTurningSpeakerOn);
 
                     JobDetail job2= JobBuilder.newJob(TurnOnSpeakerJob.class).withIdentity(azan.getAzanDateTime(),"Speaker").build();
                     logger.info(String.format("New Job is created : %s",job2.getKey().toString()));
@@ -126,10 +128,10 @@ public class MainJob implements Job{
         }
     }
 
-    private Azan getNextAzan() throws SQLException, IOException, ClassNotFoundException {
+    private Azan getNextAzan() throws SQLException, IOException, ClassNotFoundException, ParseException {
         Boolean usePlainText=true;
         DateTime today=new DateTime();
-        String todayStr=today.toString("yyyy-MM-dd");
+        String todayStr=today.toString("yyyy.MM.dd");
         ArrayList<Azan> tempList=new ArrayList<>();
 
         if (usePlainText)
@@ -177,7 +179,8 @@ public class MainJob implements Job{
 
         for (Azan az:tempList)
         {
-            DateTime azanDateTime=DateTime.parse(az.getAzanDateTime());
+            java.util.Date azanDate= Formatter.parse(az.getAzanDateTime());
+            DateTime azanDateTime=new DateTime(azanDate);
 
             if (now.isBefore(azanDateTime))
             {
@@ -193,11 +196,13 @@ public class MainJob implements Job{
 
             for (Azan az:tempList2)
             {
-                Seconds s=Seconds.secondsBetween(now,DateTime.parse(az.getAzanDateTime()));
+                java.util.Date azanDate= Formatter.parse(az.getAzanDateTime());
+                Seconds s=Seconds.secondsBetween(now,new DateTime(azanDate));
                 int seconds=s.getSeconds();
 
 
-                Seconds sMin=Seconds.secondsBetween(now,DateTime.parse(azanMinDistance.getAzanDateTime()));
+                java.util.Date azanDate2= Formatter.parse(azanMinDistance.getAzanDateTime());
+                Seconds sMin=Seconds.secondsBetween(now,new DateTime(azanDate2));
                 int secondsMin=sMin.getSeconds();
 
                 if (seconds<secondsMin)
