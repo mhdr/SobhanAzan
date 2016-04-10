@@ -2,21 +2,17 @@ package com.nasimeshomal;
 
 import org.joda.time.DateTime;
 import org.joda.time.Seconds;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Objects;
+import java.text.ParseException;
+import java.util.*;
 
 /**
  * Created by ma.ramezani on 3/5/2016.
@@ -27,6 +23,7 @@ public class MainJob implements Job{
     public void execute(JobExecutionContext context) throws JobExecutionException {
 
         Logger logger= LoggerFactory.getLogger(MainJob.class);
+
         logger.info(String.format("MainJob is running : %s",new DateTime().toString()));
 
         Azan azan=null;
@@ -47,7 +44,7 @@ public class MainJob implements Job{
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (ParseException e) {
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
 
@@ -68,7 +65,8 @@ public class MainJob implements Job{
 
                 if (!Statics.getSchedulerPlay().checkExists(jobKeyPlay))
                 {
-                    DateTime timeToPlayAzan=DateTime.parse(azan.getAzanDateTime()).minusSeconds(offsetForPlay);
+                    java.util.Date azanDate= Formatter.parse(azan.getAzanDateTime());
+                    DateTime timeToPlayAzan=DateTime.parse(azanDate.toString()).minusSeconds(offsetForPlay);
 
                     JobDetail job= JobBuilder.newJob(PlayJob.class).withIdentity(azan.getAzanDateTime(),"Play").build();
                     logger.info(String.format("New Job is created : %s",job.getKey().toString()));
@@ -99,7 +97,8 @@ public class MainJob implements Job{
 
                 if (!Statics.getSchedulerSpeaker().checkExists(jobKeySpeaker))
                 {
-                    DateTime timeToTurnOnSpeaker=DateTime.parse(azan.getAzanDateTime()).minusSeconds(offsetForTurningSpeakerOn);
+                    java.util.Date azanDate= Formatter.parse(azan.getAzanDateTime());
+                    DateTime timeToTurnOnSpeaker=DateTime.parse(azanDate.toString()).minusSeconds(offsetForTurningSpeakerOn);
 
                     JobDetail job2= JobBuilder.newJob(TurnOnSpeakerJob.class).withIdentity(azan.getAzanDateTime(),"Speaker").build();
                     logger.info(String.format("New Job is created : %s",job2.getKey().toString()));
@@ -121,26 +120,32 @@ public class MainJob implements Job{
 
             } catch (SchedulerException e) {
                 e.printStackTrace();
+            } catch (ParseException e) {
+                e.printStackTrace();
             }
         }
     }
 
-    private Azan getNextAzan() throws SQLException, IOException, ParseException {
-        Boolean useJson=true;
+    private Azan getNextAzan() throws SQLException, IOException, ClassNotFoundException {
+        Boolean usePlainText=true;
         DateTime today=new DateTime();
         String todayStr=today.toString("yyyy-MM-dd");
         ArrayList<Azan> tempList=new ArrayList<>();
 
-        if (useJson)
+        if (usePlainText)
         {
-            byte[] encoded= Files.readAllBytes(Paths.get("Azan.json"));
-            String jsonStr=new String(encoded);
+            List<String> lines= Files.readAllLines(Paths.get("Azan.txt"));
 
-            JSONParser parser=new JSONParser();
-            JSONObject azanTimes= (JSONObject) parser.parse(jsonStr);
+            for (String s:lines)
+            {
+                String azanDateTime=s.split(",")[0];
+                int azanType= Integer.parseInt(s.split(",")[1]);
 
-            System.out.print("");
-
+                if (azanDateTime.startsWith(todayStr))
+                {
+                    tempList.add(new Azan(azanDateTime,azanType));
+                }
+            }
         }
         else {
             Connection connection = DriverManager.getConnection("jdbc:sqlite:Azan.db");
@@ -165,8 +170,6 @@ public class MainJob implements Job{
             statement.close();
             connection.close();
         }
-
-
 
         DateTime now=new DateTime();
 

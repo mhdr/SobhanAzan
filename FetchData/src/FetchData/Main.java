@@ -4,9 +4,6 @@ import net.time4j.PlainDate;
 import net.time4j.SystemClock;
 import net.time4j.calendar.PersianCalendar;
 import org.joda.time.DateTime;
-import org.joda.time.Interval;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -20,15 +17,12 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Vector;
 
 public class Main {
 
     public static void main(String[] args) throws IOException, SQLException {
 
-        Boolean useJson=true;
+        Boolean usePlainText=true;
 
         PlainDate today = SystemClock.inLocalView().today();
         PersianCalendar from = null;
@@ -53,9 +47,11 @@ public class Main {
 
         String baseUrl="http://www.tabnak.ir/fa/prayer/time/25/25_163/";
 
-        if (useJson) {
+        if (usePlainText) {
 
-            ArrayList<Azan> azanTimes=new ArrayList<Azan>();
+            File AzanFile=new File("Azan.txt");
+            AzanFile.createNewFile();
+            FileWriter writer=new FileWriter(AzanFile);
 
             for (String date : dates) {
                 String url = String.format("%s%s", baseUrl, date);
@@ -74,31 +70,15 @@ public class Main {
                 DateTime zohrDateTime = PersianStringDate.GetGregorianDateTime(date.toString(), azanZohr);
                 DateTime maghrebDateTime = PersianStringDate.GetGregorianDateTime(date.toString(), azanMaghreb);
 
-                Azan azan1=new Azan();
-                azan1.AzanDateTime=sobDateTime.toString();
-                azan1.AzanType=1;
+                String line1=String.format("%s,%s\r\n",Formatter.format(sobDateTime),1);
+                String line2=String.format("%s,%s\r\n",Formatter.format(zohrDateTime),2);
+                String line3=String.format("%s,%s\r\n",Formatter.format(maghrebDateTime),3);
 
-
-                Azan azan2=new Azan();
-                azan2.AzanDateTime=zohrDateTime.toString();
-                azan2.AzanType=2;
-
-                Azan azan3=new Azan();
-                azan3.AzanDateTime=maghrebDateTime.toString();
-                azan3.AzanType=3;
-
-                azanTimes.add(azan1);
-                azanTimes.add(azan2);
-                azanTimes.add(azan3);
+                writer.write(line1);
+                writer.write(line2);
+                writer.write(line3);
             }
 
-            JSONObject jsonObject=new JSONObject();
-            jsonObject.put("Azan",azanTimes);
-
-            File AzanFile=new File("Azan.json");
-            AzanFile.createNewFile();
-            FileWriter writer=new FileWriter(AzanFile);
-            jsonObject.writeJSONString(writer);
             writer.flush();
             writer.close();
         }

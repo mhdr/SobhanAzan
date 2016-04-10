@@ -2,6 +2,7 @@ package com.nasimeshomal;
 
 import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.Player;
+import org.joda.time.DateTime;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -10,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.Date;
 
 /**
  * Created by Mahmood on 3/5/2016.
@@ -21,17 +21,17 @@ public class PlayJob implements Job {
         Logger logger= LoggerFactory.getLogger(TurnOnSpeakerJob.class);
 
         try {
-            logger.info("%s : Azan is playing now ...",new Date().toString());
+            logger.info("%s : Azan is playing now ...",new DateTime().toString());
 
             this.PlayAzan();
-            logger.info("%s : End of playing Azan.",new Date().toString());
+            logger.info("%s : End of playing Azan.",new DateTime().toString());
 
             Thread.sleep(4000);
             RaspGPIO.getInstance().getSpeakerPin().low();
-            logger.info("%s : Speaker is Off.",new Date().toString());
+            logger.info("%s : Speaker is Off.",new DateTime().toString());
         } catch (InterruptedException e) {
             e.printStackTrace();
-            logger.trace("%s : Exeption while playing Azan ==> %s",new Date().toString(),e.getMessage());
+            logger.trace("%s : Exeption while playing Azan ==> %s",new DateTime().toString(),e.getMessage());
         }
     }
 

@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<updateDescriptor baseUrl="">
-  <entry targetMediaFileId="24" updatableVersionMin="" updatableVersionMax="" fileName="Azan_windows_1_0.exe" newVersion="1.0" newMediaFileId="24" fileSize="12520448" bundledJre="" archive="false">
-    <comment language="en" />
-  </entry>
-</updateDescriptor>
-

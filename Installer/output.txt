@@ -1,3 +1,0 @@
-# List of generated media files. The columns are tab-separated:
-# id | media file type | display name | media file path
-24	windows	Windows	C:\Users\Mahmood\Documents\Projects\SobhanAzan\Installer\Azan_windows_1_0.exe
