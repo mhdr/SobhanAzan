@@ -23,6 +23,4 @@ public class RaspGPIO {
         speakerPin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01, "Speaker", PinState.LOW);
         speakerPin.setShutdownOptions(true, PinState.LOW);
     }
-
-
 }

@@ -21,17 +21,17 @@ public class PlayJob implements Job {
         Logger logger= LoggerFactory.getLogger(TurnOnSpeakerJob.class);
 
         try {
-            logger.info("%s : Azan is playing now ...",new DateTime().toString());
+            logger.info(String.format("%s : Azan is playing now ...",new DateTime().toString()));
 
             this.PlayAzan();
-            logger.info("%s : End of playing Azan.",new DateTime().toString());
+            logger.info(String.format("%s : End of playing Azan.",new DateTime().toString()));
 
             Thread.sleep(4000);
             RaspGPIO.getInstance().getSpeakerPin().low();
-            logger.info("%s : Speaker is Off.",new DateTime().toString());
+            logger.info(String.format(String.format("%s : Speaker is Off.",new DateTime().toString())));
         } catch (InterruptedException e) {
             e.printStackTrace();
-            logger.trace("%s : Exeption while playing Azan ==> %s",new DateTime().toString(),e.getMessage());
+            logger.trace(String.format("%s : Exeption while playing Azan ==> %s",new DateTime().toString(),e.getMessage()));
         }
     }
 
