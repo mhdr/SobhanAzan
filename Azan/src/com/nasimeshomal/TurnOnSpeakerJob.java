@@ -16,12 +16,12 @@ public class TurnOnSpeakerJob implements Job {
 
         try {
             RaspGPIO.getInstance().getSpeakerPin().high();
-            logger.info("%s : Speaker is On.",new DateTime().toString());
+            logger.info(String.format("%s : Speaker is On.",new DateTime().toString()));
         }
         catch (Exception e)
         {
             e.printStackTrace();
-            logger.trace("%s : Exeption while turning Speaker On ==> %s",new DateTime().toString(),e.getMessage());
+            logger.trace(String.format("%s : Exeption while turning Speaker On ==> %s",new DateTime().toString(),e.getMessage()));
         }
 
     }
