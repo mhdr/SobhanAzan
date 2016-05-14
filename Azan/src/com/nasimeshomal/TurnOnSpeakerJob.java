@@ -15,7 +15,7 @@ public class TurnOnSpeakerJob implements Job {
         Logger logger= LoggerFactory.getLogger(TurnOnSpeakerJob.class);
 
         try {
-            RaspGPIO.getInstance().getSpeakerPin().high();
+            RaspGPIO.getInstance().TurnOnAmp();
             logger.info(String.format("%s : Speaker is On.",new DateTime().toString()));
         }
         catch (Exception e)

@@ -27,7 +27,7 @@ public class PlayJob implements Job {
             logger.info(String.format("%s : End of playing Azan.",new DateTime().toString()));
 
             Thread.sleep(4000);
-            RaspGPIO.getInstance().getSpeakerPin().low();
+            RaspGPIO.getInstance().TurnOffAmp();
             logger.info(String.format(String.format("%s : Speaker is Off.",new DateTime().toString())));
         } catch (InterruptedException e) {
             e.printStackTrace();

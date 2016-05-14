@@ -18,9 +18,28 @@ public class RaspGPIO {
 
     GpioPinDigitalOutput speakerPin;
 
+    public GpioPinDigitalOutput getPowerPin() {
+        return powerPin;
+    }
+
+    GpioPinDigitalOutput powerPin;
+
+    public void TurnOnAmp() throws InterruptedException {
+        this.powerPin.high();
+        Thread.sleep(2*1000);
+        this.speakerPin.pulse(1000,true);
+    }
+
+    public void TurnOffAmp()
+    {
+        this.powerPin.low();
+    }
+
     private RaspGPIO() {
         GpioController gpio = GpioFactory.getInstance();
         speakerPin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01, "Speaker", PinState.LOW);
+        powerPin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_02, "Power", PinState.LOW);
         speakerPin.setShutdownOptions(true, PinState.LOW);
+        powerPin.setShutdownOptions(true, PinState.LOW);
     }
 }
